@@ -1,8 +1,7 @@
 import numpy as np
+from expanded_random_representation import ExpandedRandomRepresentation
 
-
-a = np.asarray([[1,2,3],[2,2,2]])
-b = np.asarray([2,4,2])
-
-c = np.count_nonzero(a == 2, axis=1).reshape([2,1])
-print(c)
+ERR_data_gen = ExpandedRandomRepresentation(20, 20, 0.6, weights_mode="data_gen")
+x = np.random.randint(2, size=20).reshape([20,1])
+y = ERR_data_gen.calculate_output(x)
+print(y)
