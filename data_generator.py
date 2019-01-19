@@ -14,6 +14,6 @@ class DataGenerator:
         self.ERR_data_gen = ExpandedRandomRepresentation(m, num_ltu, beta_ltu, weights_mode="data_gen")
 
     def get_sample(self):
-        y = self.ERR_data_gen.calculate_output(np.random.randint(2, size=self.m)) \
-            + np.random.normal(self.mu, self.sigma, 1)[0]
-        return y
+        x = np.random.randint(2, size=self.m)
+        y = self.ERR_data_gen.calculate_output(x) + np.random.normal(self.mu, self.sigma, 1)[0]
+        return x, y

@@ -1,7 +1,9 @@
 import numpy as np
+from data_generator import DataGenerator
 from expanded_random_representation import ExpandedRandomRepresentation
-
-ERR_data_gen = ExpandedRandomRepresentation(20, 20, 0.6, weights_mode="data_gen")
-x = np.random.randint(2, size=20).reshape([20,1])
-y = ERR_data_gen.calculate_output(x)
-print(y)
+data_gen = DataGenerator(20,20,0.6,0,1)
+rep = ExpandedRandomRepresentation(20,1000000,0.6)
+for i in range(1000000):
+    x, y = data_gen.get_sample()
+    delta = rep.update_weights(x, y)
+    print(delta*delta)
