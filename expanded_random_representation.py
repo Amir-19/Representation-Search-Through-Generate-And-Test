@@ -3,38 +3,53 @@ import numpy as np
 
 class ExpandedRandomRepresentation:
 
-    def __init__(self, m, n, beta, gamma=0.1, weights_mode="zero", data_gen_dis_mu=0, data_gen_dis_sigma=1):
+    def __init__(self, m, n, beta=0.6, gamma=0.1):
+        """
 
+        :param m: input size (in bits)
+        :param n: number of hidden LTU units
+        :param beta: the proportion of the bits that have to match the prototype
+        :param gamma: effective step size
+        """
         self.m = m
         self.n = n
         self.beta = beta
         self.gamma = gamma
-        self.v = np.random.choice([-1, 1], m * n, p=[0.5, 0.5]).reshape([m, n])
-        if weights_mode == "zero":
-            self.w = np.zeros([n+1, 1])
-        elif weights_mode == "data_gen":
-            self.w = np.random.normal(data_gen_dis_mu, data_gen_dis_sigma, n+1).reshape([n+1, 1])
-        self.s = np.count_nonzero(self.v == -1, axis=0).reshape([n, 1])
-        self.threshold = np.ones([n, 1])*(self.m * self.beta) - self.s
-        self.k = 0
-        self.step_size = 1
+        self.v = np.random.choice([-1, 1], (m, n), p=[0.5, 0.5])
+        self.smin = np.count_nonzero(self.v == -1, axis=0) * -1
+        self.theta = self.smin + (self.beta * self.m)
+        self.w = np.zeros((n + 1, 1))
         self.f = None
+        self.k = 0
         self.lambdak = 0
+        self.step_size = 1
 
     def calculate_output(self, x):
+        """
 
-        f = np.dot(x.T, self.v)  # expansion
-        f = np.greater(f, self.threshold.T).astype(int)  # LTUs output
-        self.f = np.append(f, [1]).reshape([self.n+1, 1])  # adding the bias unit to the f
-        y = np.dot(self.w.T, self.f)  # map
+        :param x: input as a vector of bits
+        :return: the output of ERR
+        """
+        assert x.shape == (self.m,) or x.shape == (self.m, 1)
+        f = np.dot(x.T, self.v)
+        f = np.greater_equal(f, self.theta).astype(int)
+        self.f = np.append([1], f)  # check
+        y = np.dot(self.f, self.w)[0]
         return y
 
-    def update_weights(self, x, true_y):
+    def update_weights(self, x, y_target):
+        """
+
+        :param x: input as a vector of bits
+        :param y_target: target output for the input x
+        :return: the difference between the prediction and y_target
+        """
         self.k += 1
-        est_y = self.calculate_output(x)
-        delta = true_y - est_y
-        feature_norm = np.dot(self.f.T,self.f)[0]
+        y_est = self.calculate_output(x)
+        delta = y_target - y_est
+        feature_norm = np.dot(self.f.T, self.f)
         self.lambdak = (self.lambdak * (self.k - 1) + feature_norm) / self.k
         self.step_size = self.gamma / self.lambdak
-        self.w = self.w + self.step_size * delta * self.f
+        temp = self.step_size * delta * self.f
+        self.w = np.add(self.w, temp.reshape((self.n + 1, 1)))
         return delta
