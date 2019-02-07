@@ -42,7 +42,7 @@ class ExpandedRandomRepresentation:
 
         :param x: input as a vector of bits
         :param y_target: target output for the input x
-        :return: the difference between the prediction and y_target
+        :return: the prediction error
         """
         self.k += 1
         y_est = self.calculate_output(x)
