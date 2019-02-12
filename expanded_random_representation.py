@@ -3,7 +3,7 @@ import numpy as np
 
 class ExpandedRandomRepresentation:
 
-    def __init__(self, m, n, beta=0.6, gamma=0.1, gen_test=False, rho=0.05, maturity_threshold=2):
+    def __init__(self, m, n, beta=0.6, gamma=0.1, gen_test=False, rho=0.005, maturity_threshold=2):
         """
 
         :param m: input size (in bits)
@@ -62,9 +62,17 @@ class ExpandedRandomRepresentation:
 
         if self.gen_test:
             self.age += 1
-            # evaluate the current features
+            # evaluate the current features and create a mask for the features that need to be regenerated
             generate_mask = np.zeros((self.n + 1, 1))
-            idx = np.argpartition(self.w[:-1], self.reg_num, axis=0)
+            idx = np.argpartition(self.w[:-1], self.reg_num, axis=0) # find the least weighted features
             generate_mask[idx[:self.reg_num]] = 1
-            
+            # apply the age mask based on the maturity threshold
+            age_mask = np.greater_equal(self.age, self.maturity_threshold).astype(int).reshape(self.n + 1, 1)
+            generate_mask = np.multiply(generate_mask, age_mask)
+            # we generate new features and replace the old ones where generate mask is 1
+            gen_num = np.dot(generate_mask.T,generate_mask)[0][0]
+            generate_mask = np.argwhere(generate_mask == 1)[:, 0]
+            if gen_num > 0:
+                generated_partial_v = np.random.choice([-1, 1], (self.m, self.reg_num), p=[0.5, 0.5])
+                self.v[:, generate_mask] = generated_partial_v
         return delta
