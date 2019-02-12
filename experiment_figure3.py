@@ -2,8 +2,8 @@ import numpy as np
 from data_generator import DataGenerator
 from expanded_random_representation import ExpandedRandomRepresentation
 
-error_interval = 1000
-total_steps = 100000
+error_interval = 10000
+total_steps = 1000000
 # total_steps = 5
 
 data_gen = DataGenerator(20, 20, 0.6, 0, 1, 0, 1)

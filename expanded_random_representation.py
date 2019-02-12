@@ -70,9 +70,15 @@ class ExpandedRandomRepresentation:
             age_mask = np.greater_equal(self.age, self.maturity_threshold).astype(int).reshape(self.n + 1, 1)
             generate_mask = np.multiply(generate_mask, age_mask)
             # we generate new features and replace the old ones where generate mask is 1
-            gen_num = np.dot(generate_mask.T,generate_mask)[0][0]
-            generate_mask = np.argwhere(generate_mask == 1)[:, 0]
+            gen_num = int(np.dot(generate_mask.T,generate_mask)[0][0])
+            generate_mask_idx = np.argwhere(generate_mask == 1)[:, 0]
             if gen_num > 0:
-                generated_partial_v = np.random.choice([-1, 1], (self.m, self.reg_num), p=[0.5, 0.5])
-                self.v[:, generate_mask] = generated_partial_v
+                generated_partial_v = np.random.choice([-1, 1], (self.m, gen_num), p=[0.5, 0.5])
+                self.v[:, generate_mask_idx] = generated_partial_v
+                # self.age[generate_mask] = 0
+                np.putmask(self.age, generate_mask, [0])
+                # self.w[generate_mask] = 0.0
+                np.putmask(self.w, generate_mask, [0])
+                # note: super important, i need to exclude not mature features first and then look for bad features
+                # not afterward. now it's kindda not taking full advantage of gen-test ...
         return delta
