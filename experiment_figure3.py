@@ -8,8 +8,8 @@ total_steps = 1000000
 
 data_gen = DataGenerator(20, 20, 0.6, 0, 1, 0, 1)
 
-S1000 = ExpandedRandomRepresentation(20, 1000, 0.6, gen_test=True)
-F1000 = ExpandedRandomRepresentation(20, 1000, 0.6, gen_test=False)
+S1000 = ExpandedRandomRepresentation(20, 10000, 0.6, gen_test=True)
+F1000 = ExpandedRandomRepresentation(20, 10000, 0.6, gen_test=False)
 
 error_sum_S1000 = 0
 error_sum_F1000 = 0
