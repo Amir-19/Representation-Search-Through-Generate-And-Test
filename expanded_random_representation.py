@@ -81,4 +81,5 @@ class ExpandedRandomRepresentation:
                 np.putmask(self.w, generate_mask, [0])
                 # note: super important, i need to exclude not mature features first and then look for bad features
                 # not afterward. now it's kindda not taking full advantage of gen-test ...
+                # also need to update the threshold since we have changed the LTU
         return delta
